@@ -1,7 +1,14 @@
 # Ex. No. : 10 - BUILDING A MOBILE APP SECURITY SCANNER
 # AIM: To develop a Python-based Mobile App Security Scanner that automatically analyzes an Android APK file.
 
-from androguard.misc import AnalyzeAPK
+try:
+    from loguru import logger
+    logger.remove()
+    from androguard.core.apk import APK
+    apk = APK("uptodown-com.OfflineGames.apk")
+except Exception:
+    from androguard.misc import AnalyzeAPK
+    apk, dex, analysis = AnalyzeAPK("uptodown-com.OfflineGames.apk")
 
 dangerous_permissions = [
     "android.permission.READ_SMS",
@@ -10,8 +17,6 @@ dangerous_permissions = [
     "android.permission.RECORD_AUDIO",
     "android.permission.ACCESS_FINE_LOCATION"
 ]
-
-apk, dex, analysis = AnalyzeAPK("uptodown-com.OfflineGames.apk")
 
 print("\n========== MOBILE APP SECURITY REPORT ==========\n")
 print("Package Name :", apk.get_package())

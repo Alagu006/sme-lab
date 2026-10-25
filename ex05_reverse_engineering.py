@@ -1,9 +1,14 @@
 # Ex. No. : 5 - REVERSE ENGINEERING OF ANDROID APPLICATIONS
 # AIM: To perform reverse engineering on an Android application to understand its architecture.
 
-from androguard.misc import AnalyzeAPK
-
-apk, dex, analysis = AnalyzeAPK("uptodown-com.OfflineGames.apk")
+try:
+    from loguru import logger
+    logger.remove()
+    from androguard.core.apk import APK
+    apk = APK("uptodown-com.OfflineGames.apk")
+except Exception:
+    from androguard.misc import AnalyzeAPK
+    apk, dex, analysis = AnalyzeAPK("uptodown-com.OfflineGames.apk")
 
 print("Application Activities")
 print("----------------------")
