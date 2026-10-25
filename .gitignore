@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.pyo
+sample/
+decoded_app/
+.venv/
