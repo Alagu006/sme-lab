@@ -1,0 +1,1116 @@
+Worked for 50s
+
+### CY3763 – Security in Mobile Exploitation Laboratory
+
+### All 10 experiments in order
+
+For each experiment, I’ll provide:
+
+* Step-by-step procedure – what to do in Kali Linux.
+
+* Original PDF code – the code from your lab manual.
+
+* Shorter code – a simplified version that performs the same main task.
+
+* Execution commands and expected result – how to run it and what to verify.
+
+Important: The shorter versions are simplified alternatives, not replacements for the original PDF programs if your examiner specifically asks you to write the manual code. Use only APKs and devices you own or are authorized to test.
+
+### Common preparation
+
+Open Kali Linux and check Python:
+
+```bash
+python3 --version
+```
+
+Create a working folder:
+
+```bash
+mkdir MobileLab
+cd MobileLab
+```
+
+Copy your test APK into this folder:
+
+```bash
+cp ~/Downloads/sample.apk .
+ls
+```
+
+Install the libraries when required:
+
+```bash
+pip install androguard
+pip install frida-tools
+pip install mitmproxy
+pip install appium
+pip install selenium
+```
+
+Some experiments also require external tools such as APKTool, JADX, ADB, an Android Emulator, or an Appium server.
+
+### Experiment 1 – Basic Android APK Analysis
+
+Aim: To examine the internal structure and contents of an Android APK file.
+
+### Step-by-step procedure
+
+* Start Kali Linux.
+
+* Obtain an Android APK file named `sample.apk`.
+
+* Create a working directory named `APK_Analysis`.
+
+* Copy the APK into the directory.
+
+* Decode the APK using APKTool.
+
+* Open the decoded project folder.
+
+* Examine `AndroidManifest.xml`.
+
+* Identify the package name, permissions, activities, and components.
+
+* Execute the Python program to list the APK contents.
+
+* Analyze the extracted files.
+
+### 1\. Original PDF code
+
+```python
+import zipfile
+
+apk_file = "sample.apk"
+
+try:
+    with zipfile.ZipFile(apk_file, 'r') as apk:
+        print("APK CONTENTS")
+        print("-----------------------------")
+
+        for file in apk.namelist():
+            print(file)
+
+except FileNotFoundError:
+    print("APK file not found.")
+```
+
+### 2\. Shorter code
+
+```python
+import zipfile
+
+try:
+    with zipfile.ZipFile("sample.apk") as apk:
+        print(*apk.namelist(), sep="\n")
+except FileNotFoundError:
+    print("APK not found")
+```
+
+### Execution commands
+
+```bash
+mkdir APK_Analysis
+cd APK_Analysis
+cp ~/Downloads/sample.apk .
+apktool d sample.apk
+cd sample
+ls
+cat AndroidManifest.xml
+```
+
+Run the Python program from the directory containing the APK:
+
+```bash
+python3 apk_analysis.py
+```
+
+Expected result: The program displays APK files such as `AndroidManifest.xml`, `classes.dex`, `META-INF`, `assets`, `lib`, and `res`.
+
+Result: The Android APK was successfully analyzed using APKTool and Python.
+
+### Experiment 2 – Static Code Analysis
+
+Aim: To examine an Android application's code and configuration without executing it.
+
+### Step-by-step procedure
+
+* Start Kali Linux.
+
+* Obtain the APK file.
+
+* Decode the APK using APKTool.
+
+* Open the APK using JADX.
+
+* Examine `AndroidManifest.xml`.
+
+* Identify the application package name.
+
+* Analyze the requested permissions.
+
+* Inspect Java source code for insecure coding practices.
+
+* Execute the Python program to extract APK information.
+
+* Record the analysis results.
+
+### 1\. Original PDF code
+
+```python
+from androguard.misc import AnalyzeAPK
+
+apk, dex, analysis = AnalyzeAPK("sample.apk")
+
+print("Package Name :", apk.get_package())
+
+print("Application Name :", apk.get_app_name())
+
+print("Version Name :", apk.get_androidversion_name())
+
+print("Version Code :", apk.get_androidversion_code())
+
+print("\nPermissions")
+
+for permission in apk.get_permissions():
+    print(permission)
+```
+
+### 2\. Shorter code
+
+```python
+from androguard.misc import AnalyzeAPK
+
+apk, _, _ = AnalyzeAPK("sample.apk")
+
+print("Package:", apk.get_package())
+print("App:", apk.get_app_name())
+print("Version:", apk.get_androidversion_name())
+
+print("\nPermissions:")
+print(*apk.get_permissions(), sep="\n")
+```
+
+### Execution commands
+
+```bash
+apktool d sample.apk
+jadx-gui sample.apk
+cat sample/AndroidManifest.xml
+python3 static_analysis.py
+```
+
+Expected result: The program displays the package name, application name, version name, version code, and requested permissions.
+
+Result: The APK was successfully decompiled and analyzed using static code analysis techniques.
+
+### Experiment 3 – Dynamic Analysis Setup
+
+Aim: To configure an Android Emulator, ADB, and Frida to observe application runtime behavior.
+
+### Step-by-step procedure
+
+* Start Kali Linux.
+
+* Launch the Android Emulator.
+
+* Open the terminal.
+
+* Verify that ADB is installed.
+
+* Start the ADB server.
+
+* Connect to the Android Emulator.
+
+* Verify the connected device.
+
+* Install Frida Tools using Python.
+
+* Verify the Frida installation.
+
+* Test communication between the host machine and Android device.
+
+### 1\. Original PDF code
+
+```python
+import subprocess
+
+print("Connected Android Devices")
+print("--------------------------")
+
+subprocess.run(["adb", "devices"])
+
+print("\nAndroid Version")
+print("--------------------------")
+
+subprocess.run([
+    "adb", "shell",
+    "getprop", "ro.build.version.release"
+])
+
+print("\nDevice Model")
+print("--------------------------")
+
+subprocess.run([
+    "adb", "shell",
+    "getprop", "ro.product.model"
+])
+```
+
+### 2\. Shorter code
+
+```python
+import subprocess
+
+for title, cmd in [
+    ("Devices", ["adb", "devices"]),
+    ("Android Version", ["adb", "shell", "getprop", "ro.build.version.release"]),
+    ("Device Model", ["adb", "shell", "getprop", "ro.product.model"])
+]:
+    print("\n" + title)
+    subprocess.run(cmd)
+```
+
+### Execution commands
+
+```bash
+adb version
+adb start-server
+adb devices
+adb shell
+```
+
+Install the test APK if required:
+
+```bash
+adb install sample.apk
+```
+
+Install and verify Frida Tools:
+
+```bash
+pip install frida-tools
+frida --version
+```
+
+Run the Python program:
+
+```bash
+python3 dynamic_analysis.py
+```
+
+Expected result: ADB displays the connected emulator, Android version, and device model. Frida displays its installed version.
+
+Result: The dynamic analysis environment was successfully configured using the Android Emulator, ADB, Python, and Frida.
+
+### Experiment 4 – Network Traffic Analysis
+
+Aim: To capture and analyze Android application network traffic using mitmproxy.
+
+### Step-by-step procedure
+
+* Start Kali Linux.
+
+* Launch the Android Emulator.
+
+* Start the mitmproxy server.
+
+* Configure the Android device to use the proxy server.
+
+* Install the mitmproxy CA certificate on the test device when HTTPS inspection is required.
+
+* Launch the Android application.
+
+* Perform operations that generate network requests.
+
+* Observe captured HTTP and HTTPS requests in mitmproxy.
+
+* Analyze request headers, response headers, cookies, JSON data, and API endpoints.
+
+* Save the captured traffic for further analysis.
+
+### 1\. Original PDF code
+
+```python
+from mitmproxy import http
+
+def request(flow: http.HTTPFlow):
+    print("====================================")
+    print("Request URL :", flow.request.pretty_url)
+    print("Request Method :", flow.request.method)
+    print("Client IP :", flow.client_conn.address)
+    print("====================================")
+
+def response(flow: http.HTTPFlow):
+    print("Status Code :", flow.response.status_code)
+    print("Content Type :", flow.response.headers.get("Content-Type"))
+```
+
+### 2\. Shorter code
+
+```python
+from mitmproxy import http
+
+def request(f: http.HTTPFlow):
+    print("URL:", f.request.pretty_url)
+    print("Method:", f.request.method)
+
+def response(f: http.HTTPFlow):
+    print("Status:", f.response.status_code)
+```
+
+### Execution commands
+
+Start the proxy:
+
+```bash
+mitmproxy
+```
+
+Or use the web interface:
+
+```bash
+mitmweb
+```
+
+Check the emulator:
+
+```bash
+adb devices
+```
+
+Configure the emulator proxy:
+
+```bash
+adb shell settings put global http_proxy 10.0.2.2:8080
+```
+
+Verify the proxy:
+
+```bash
+adb shell settings get global http_proxy
+```
+
+Run the Python script as a mitmproxy addon:
+
+```bash
+mitmdump -s network_analysis.py
+```
+
+Expected result: The program displays request URLs, methods, client IP addresses, HTTP status codes, and content types.
+
+Result: Network traffic was successfully captured and analyzed using mitmproxy.
+
+### Experiment 5 – Reverse Engineering of Android Applications
+
+Aim: To examine the internal architecture, source code, components, and security implementation of an Android application.
+
+### Step-by-step procedure
+
+* Start Kali Linux.
+
+* Obtain the Android APK.
+
+* Decode the APK using APKTool.
+
+* Open the APK using JADX.
+
+* Examine `AndroidManifest.xml`.
+
+* Analyze the application package structure.
+
+* Inspect the decompiled Java source code.
+
+* Identify activities, services, and API calls.
+
+* Search for hardcoded credentials or sensitive information.
+
+* Record the observations.
+
+### 1\. Original PDF code
+
+```python
+from androguard.misc import AnalyzeAPK
+
+apk, dex, analysis = AnalyzeAPK("sample.apk")
+
+print("Application Activities")
+print("----------------------")
+
+for activity in apk.get_activities():
+    print(activity)
+
+print("\nApplication Services")
+print("----------------------")
+
+for service in apk.get_services():
+    print(service)
+
+print("\nBroadcast Receivers")
+print("----------------------")
+
+for receiver in apk.get_receivers():
+    print(receiver)
+```
+
+### 2\. Shorter code
+
+```python
+from androguard.misc import AnalyzeAPK
+
+apk, _, _ = AnalyzeAPK("sample.apk")
+
+for title, items in [
+    ("Activities", apk.get_activities()),
+    ("Services", apk.get_services()),
+    ("Receivers", apk.get_receivers())
+]:
+    print("\n" + title)
+    print(*items, sep="\n")
+```
+
+### Execution commands
+
+```bash
+apktool d sample.apk
+jadx-gui sample.apk
+grep -R "password" sample/
+grep -R "apikey" sample/
+grep -R "token" sample/
+find sample/
+```
+
+Run the Python program:
+
+```bash
+python3 reverse_engineering.py
+```
+
+Expected result: The program displays application activities, services, and broadcast receivers. The search commands help locate suspicious strings in the decoded files.
+
+Result: The Android application was successfully reverse engineered using APKTool, JADX, and Python.
+
+### Experiment 6 – Exploiting Vulnerable Components
+
+Aim: To identify and analyze vulnerable Android components such as exported Activities, Services, Broadcast Receivers, and Content Providers.
+
+### Step-by-step procedure
+
+* Start Kali Linux.
+
+* Launch the Android Emulator.
+
+* Install the authorized test APK on the emulator.
+
+* Decode the APK using APKTool.
+
+* Examine `AndroidManifest.xml`.
+
+* Identify exported Activities, Services, Broadcast Receivers, and Content Providers.
+
+* Use ADB commands to test the identified components.
+
+* Observe the application's response.
+
+* Record any security weaknesses.
+
+* Stop the experiment.
+
+### 1\. Original PDF code
+
+```python
+from androguard.misc import AnalyzeAPK
+
+apk, dex, analysis = AnalyzeAPK("sample.apk")
+
+print("Exported Activities")
+print("------------------------")
+
+for activity in apk.get_activities():
+    print(activity)
+
+print("\nExported Services")
+print("------------------------")
+
+for service in apk.get_services():
+    print(service)
+
+print("\nBroadcast Receivers")
+print("------------------------")
+
+for receiver in apk.get_receivers():
+    print(receiver)
+
+print("\nContent Providers")
+print("------------------------")
+
+for provider in apk.get_providers():
+    print(provider)
+```
+
+### 2\. Shorter code
+
+```python
+from androguard.misc import AnalyzeAPK
+
+apk, _, _ = AnalyzeAPK("sample.apk")
+
+for name, items in [
+    ("Activities", apk.get_activities()),
+    ("Services", apk.get_services()),
+    ("Receivers", apk.get_receivers()),
+    ("Providers", apk.get_providers())
+]:
+    print("\n" + name)
+    print(*items, sep="\n")
+```
+
+### Execution commands
+
+Check the emulator:
+
+```bash
+adb devices
+```
+
+Install the test APK:
+
+```bash
+adb install sample.apk
+```
+
+Test an activity belonging to your test application:
+
+```bash
+adb shell am start -n com.example.demo/.MainActivity
+```
+
+Test a service:
+
+```bash
+adb shell am startservice -n com.example.demo/.SyncService
+```
+
+Send a test broadcast:
+
+```bash
+adb shell am broadcast -a com.example.demo.TEST
+```
+
+Inspect package information:
+
+```bash
+adb shell dumpsys package com.example.demo
+```
+
+Expected result: The program displays the application components. ADB reports whether the test activity or service could be started.
+
+Important PDF note: The Python program lists component names, but it does not actually verify their `android:exported` status. You must inspect `AndroidManifest.xml` or package details to confirm whether a component is exported.
+
+Result: Android application components were identified and tested using Python and ADB.
+
+### Experiment 7 – Automating Mobile Malware Analysis
+
+Aim: To develop a Python-based tool that identifies possible malware indicators in Android APK files.
+
+### Step-by-step procedure
+
+* Start Kali Linux.
+
+* Obtain the Android APK.
+
+* Import the required Python library.
+
+* Load the APK using Androguard.
+
+* Extract the package name and requested permissions.
+
+* Compare the permissions with a predefined dangerous-permissions list.
+
+* Display suspicious permissions.
+
+* Generate the malware analysis report.
+
+* Save or record the analysis results.
+
+* Stop the experiment.
+
+### 1\. Original PDF code
+
+```python
+from androguard.misc import AnalyzeAPK
+
+dangerous_permissions = [
+
+    "android.permission.READ_SMS",
+
+    "android.permission.SEND_SMS",
+
+    "android.permission.READ_CONTACTS",
+
+    "android.permission.RECORD_AUDIO",
+
+    "android.permission.ACCESS_FINE_LOCATION",
+
+    "android.permission.READ_CALL_LOG"
+
+]
+
+apk, dex, analysis = AnalyzeAPK("sample.apk")
+
+print("Package Name :", apk.get_package())
+
+print("\nRequested Permissions")
+
+print("--------------------------")
+
+permissions = apk.get_permissions()
+
+for permission in permissions:
+    print(permission)
+
+print("\nSuspicious Permissions")
+
+print("--------------------------")
+
+for permission in permissions:
+
+    if permission in dangerous_permissions:
+        print(permission)
+```
+
+### 2\. Shorter code
+
+```python
+from androguard.misc import AnalyzeAPK
+
+apk, _, _ = AnalyzeAPK("sample.apk")
+
+dangerous = ["READ_SMS", "SEND_SMS", "READ_CONTACTS",
+             "RECORD_AUDIO", "ACCESS_FINE_LOCATION",
+             "READ_CALL_LOG"]
+
+print("Package:", apk.get_package())
+
+for p in apk.get_permissions():
+    print(p)
+    if any(x in p for x in dangerous):
+        print("Suspicious:", p)
+```
+
+### Execution commands
+
+```bash
+python3 malware_analysis.py
+```
+
+Additional analysis commands:
+
+```bash
+apktool d sample.apk
+jadx-gui sample.apk
+adb install sample.apk
+```
+
+Expected result: The program displays the package name and requested permissions. Permissions such as `READ_SMS`, `RECORD_AUDIO`, and `READ_CONTACTS` are identified as suspicious if present.
+
+Result: The Android APK was successfully analyzed using Python and Androguard, and potentially dangerous permissions were identified.
+
+### Experiment 8 – Secure Code Practices
+
+Aim: To identify insecure coding practices such as hardcoded passwords, API keys, authentication tokens, and insecure HTTP URLs.
+
+### Step-by-step procedure
+
+* Start Kali Linux.
+
+* Decode the Android APK using APKTool.
+
+* Open the decoded project directory.
+
+* Execute the Python program.
+
+* Search application source files for passwords, API keys, tokens, secrets, and HTTP URLs.
+
+* Display the detected insecure coding practices.
+
+* Record the identified security issues.
+
+* Stop the experiment.
+
+### 1\. Original PDF code
+
+```python
+import os
+
+keywords = [
+
+    "password",
+
+    "apikey",
+
+    "token",
+
+    "secret",
+
+    "http://"
+
+]
+
+directory = "sample"
+
+print("Potential Security Issues")
+
+print("----------------------------")
+
+for root, dirs, files in os.walk(directory):
+
+    for file in files:
+
+        path = os.path.join(root, file)
+
+        try:
+
+            with open(path, "r", errors="ignore") as f:
+
+                data = f.read().lower()
+
+                for keyword in keywords:
+
+                    if keyword in data:
+                        print(keyword, "found in", path)
+
+        except:
+            pass
+```
+
+### 2\. Shorter code
+
+```python
+import os
+
+keys = ["password", "apikey", "token", "secret", "http://"]
+
+for root, _, files in os.walk("sample"):
+    for file in files:
+        path = os.path.join(root, file)
+
+        try:
+            data = open(path, errors="ignore").read().lower()
+
+            for key in keys:
+                if key in data:
+                    print(key, "found in", path)
+        except OSError:
+            pass
+```
+
+### Execution commands
+
+First decode the APK:
+
+```bash
+apktool d sample.apk
+```
+
+Run the Python program:
+
+```bash
+python3 secure_code_check.py
+```
+
+You can also search manually:
+
+```bash
+grep -R "password" sample/
+grep -R "apikey" sample/
+grep -R "token" sample/
+grep -R "http://" sample/
+```
+
+Expected result: The program displays the files containing possible hardcoded passwords, API keys, tokens, secrets, or insecure HTTP URLs.
+
+Result: Insecure coding practices were successfully identified using Python and APK analysis techniques.
+
+### Experiment 9 – Automated Testing of Mobile Apps
+
+Aim: To automate Android application functional testing using Appium and Python.
+
+### Step-by-step procedure
+
+* Start Kali Linux.
+
+* Launch the Android Emulator.
+
+* Start the Appium Server.
+
+* Verify the connected Android device using ADB.
+
+* Configure the Appium Desired Capabilities.
+
+* Establish a connection with the Android Emulator.
+
+* Launch the Android application.
+
+* Locate UI elements and perform user interactions.
+
+* Validate the application response.
+
+* Close the application.
+
+* Stop the experiment.
+
+### 1\. Original PDF code
+
+```python
+from appium import webdriver
+
+from appium.options.android import UiAutomator2Options
+
+from selenium.webdriver.common.by import By
+
+import time
+
+options = UiAutomator2Options()
+
+options.platform_name = "Android"
+
+options.device_name = "Android Emulator"
+
+options.automation_name = "UiAutomator2"
+
+options.app = "/home/kali/sample.apk"
+
+driver = webdriver.Remote(
+
+    "http://127.0.0.1:4723",
+
+    options=options
+
+)
+
+time.sleep(5)
+
+print("Application Launched Successfully")
+
+driver.quit()
+```
+
+### 2\. Shorter code
+
+```python
+from appium import webdriver
+from appium.options.android import UiAutomator2Options
+
+options = UiAutomator2Options()
+options.platform_name = "Android"
+options.device_name = "Android Emulator"
+options.automation_name = "UiAutomator2"
+options.app = "/home/kali/sample.apk"
+
+driver = webdriver.Remote(
+    "http://127.0.0.1:4723", options=options
+)
+
+print("Application Launched Successfully")
+driver.quit()
+```
+
+### Execution commands
+
+Check the emulator:
+
+```bash
+adb devices
+```
+
+Start the Appium Server:
+
+```bash
+appium
+```
+
+Open another terminal and execute:
+
+```bash
+python3 mobile_test.py
+```
+
+Expected result: The emulator launches the application, and the terminal displays:
+
+```text
+Application Launched Successfully
+Test Execution Completed Successfully.
+```
+
+Result: The Android application was successfully automated using Appium and Python.
+
+### Experiment 10 – Building a Mobile App Security Scanner
+
+Aim: To develop a Python-based Mobile App Security Scanner that analyzes Android APK files and generates a security report.
+
+### Step-by-step procedure
+
+* Start Kali Linux.
+
+* Obtain the Android APK file.
+
+* Import the required Python libraries.
+
+* Load the APK using Androguard.
+
+* Extract package information and application permissions.
+
+* Identify application components.
+
+* Compare permissions with predefined dangerous permissions.
+
+* Generate the security report.
+
+* Display the analysis results.
+
+* Stop the experiment.
+
+### 1\. Original PDF code
+
+```python
+from androguard.misc import AnalyzeAPK
+
+dangerous_permissions = [
+
+    "android.permission.READ_SMS",
+
+    "android.permission.SEND_SMS",
+
+    "android.permission.READ_CONTACTS",
+
+    "android.permission.RECORD_AUDIO",
+
+    "android.permission.ACCESS_FINE_LOCATION"
+
+]
+
+apk, dex, analysis = AnalyzeAPK("sample.apk")
+
+print("\n========== MOBILE APP SECURITY REPORT ==========\n")
+
+print("Package Name :", apk.get_package())
+
+print("Application Name :", apk.get_app_name())
+
+print("Version :", apk.get_androidversion_name())
+
+print("\nPermissions")
+
+print("--------------------------")
+
+permissions = apk.get_permissions()
+
+for permission in permissions:
+    print(permission)
+
+print("\nPotential Security Issues")
+
+print("--------------------------")
+
+for permission in permissions:
+
+    if permission in dangerous_permissions:
+        print("Dangerous Permission :", permission)
+
+print("\nActivities :", len(apk.get_activities()))
+
+print("Services :", len(apk.get_services()))
+
+print("Receivers :", len(apk.get_receivers()))
+
+print("Content Providers :", len(apk.get_providers()))
+
+print("\nSecurity Scan Completed Successfully.")
+```
+
+### 2\. Shorter code
+
+```python
+from androguard.misc import AnalyzeAPK
+
+apk, _, _ = AnalyzeAPK("sample.apk")
+
+dangerous = ["READ_SMS", "SEND_SMS", "READ_CONTACTS",
+             "RECORD_AUDIO", "ACCESS_FINE_LOCATION"]
+
+print("PACKAGE:", apk.get_package())
+print("APP:", apk.get_app_name())
+print("VERSION:", apk.get_androidversion_name())
+
+permissions = apk.get_permissions()
+
+print("\nPERMISSIONS:")
+for p in permissions:
+    print(p)
+    if any(x in p for x in dangerous):
+        print("DANGEROUS:", p)
+
+for name, items in [
+    ("Activities", apk.get_activities()),
+    ("Services", apk.get_services()),
+    ("Receivers", apk.get_receivers()),
+    ("Providers", apk.get_providers())
+]:
+    print(name + ":", len(items))
+
+print("\nSCAN COMPLETED")
+```
+
+### Execution commands
+
+Run the scanner:
+
+```bash
+python3 security_scanner.py
+```
+
+Additional APK analysis tools:
+
+```bash
+apktool d sample.apk
+jadx-gui sample.apk
+adb install sample.apk
+```
+
+Expected result: The program displays the package name, application name, version, permissions, potentially dangerous permissions, and counts of application components.
+
+Result: A Python-based Mobile App Security Scanner was successfully developed to analyze APK files and generate a basic security report.
+
+Important PDF note: The manual's algorithm mentions identifying exported components, but its supplied Python code only counts activities, services, receivers, and providers. It does not check whether those components are exported. The shorter code preserves the actual functionality of the original program rather than claiming to perform checks that are not implemented.
+
+### Quick revision table
+
+| Experiment                          | Main tool / library       | Main purpose                            |
+| ----------------------------------- | ------------------------- | --------------------------------------- |
+| 1. Basic APK Analysis               | zipfile, APKTool          | List APK contents                       |
+| 2. Static Code Analysis             | Androguard, JADX          | Extract APK information and permissions |
+| 3. Dynamic Analysis Setup           | ADB, Frida                | Monitor runtime environment             |
+| 4. Network Traffic Analysis         | mitmproxy                 | Capture HTTP/HTTPS traffic              |
+| 5. Reverse Engineering              | APKTool, JADX, Androguard | Examine application components and code |
+| 6. Exploiting Vulnerable Components | ADB, Androguard           | Identify and test exposed components    |
+| 7. Mobile Malware Analysis          | Androguard                | Detect suspicious permissions           |
+| 8. Secure Code Practices            | Python os                 | Find insecure strings in files          |
+| 9. Automated Mobile Testing         | Appium, Selenium          | Launch and automate an app              |
+| 10. Mobile App Security Scanner     | Androguard                | Combine APK checks into a report        |
+
+### Important points for your practical exam
+
+* Keep `sample.apk` in the same directory as your Python program, unless you specify its full path.
+
+* Save each program with the filename used in its execution command.
+
+* Experiments 2, 5, 6, 7, and 10 require Androguard.
+
+* Experiments 3, 4, and 9 require their respective Android testing tools and services.
+
+* Experiment 8 requires the APK to be decoded into the `sample` directory before running the scanner.
+
+* The sample outputs in the PDF are illustrative; your actual output depends on the APK and emulator.
+
+My suggestion: Practise the shorter codes first, but keep the original PDF codes ready in case you are asked to reproduce them exactly.
